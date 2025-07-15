@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Color Chart LUT Generator v3.0 - With Alignment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Professional Color Chart LUT Generator</h1>
+            <p>Advanced 3D LUT creation with 9-point calibration and intelligent color analysis</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section">
+                <div class="upload-box" id="referenceUpload">
+                    <h3>📊 Reference Color Chart</h3>
+                    <p>Upload your original calibration chart</p>
+                    <button class="upload-btn" onclick="document.getElementById('referenceFile').click()">
+                        Choose File
+                    </button>
+                    <input type="file" id="referenceFile" class="file-input" accept="image/*">
+                    <div class="preview-container" id="referencePreview"></div>
+                    <button class="align-btn" id="referenceAlignBtn" onclick="startAlignment('reference')">
+                        🎯 Align Chart
+                    </button>
+                </div>
+
+                <div class="upload-box" id="cameraUpload">
+                    <h3>📷 Camera Capture</h3>
+                    <p>Upload the camera/LED wall capture</p>
+                    <button class="upload-btn" onclick="document.getElementById('cameraFile').click()">
+                        Choose File
+                    </button>
+                    <input type="file" id="cameraFile" class="file-input" accept="image/*">
+                    <div class="preview-container" id="cameraPreview"></div>
+                    <button class="align-btn" id="cameraAlignBtn" onclick="startAlignment('camera')">
+                        🎯 Align Chart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alignment Section -->
+            <div class="alignment-section" id="alignmentSection">
+                <h2 class="alignment-title">🎯 9-Marker Crosshair Alignment</h2>
+                <div class="alignment-subtitle" id="alignmentSubtitle">Click precisely on each crosshair center in order</div>
+
+                <div class="instructions-card">
+                    <h4>🎯 How to Align Your Crosshairs</h4>
+                    <ol class="instructions-list">
+                        <li><strong>Click on each crosshair center</strong> in order: Top row (left to right), Middle row, Bottom row</li>
+                        <li><strong>Click on the CENTER intersection</strong> of each crosshair (where the lines cross)</li>
+                        <li><strong>Be as precise as possible</strong> - this determines grid accuracy for the entire chart</li>
+                        <li><strong>Watch the grid overlay</strong> appear after placing all 9 markers</li>
+                    </ol>
+                </div>
+
+                <div class="marker-progress" id="markerProgress">
+                    <div class="marker-card current" id="marker-0">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Top-Left</div>
+                        <div class="marker-coords">Click to place</div>
+                    </div>
+                    <!-- ... 8 more marker cards ... -->
+                </div>
+
+                <div class="canvas-container">
+                    <div class="canvas-title" id="canvasTitle">Select an image to start alignment</div>
+                    <canvas id="alignmentCanvas" class="alignment-canvas" width="800" height="600"></canvas>
+                    <div class="canvas-instructions" id="canvasInstructions">
+                        Upload an image and click "Align Chart" to begin
+                    </div>
+                    <!-- Zoom Overlay -->
+                    <div class="zoom-overlay" id="zoomOverlay">
+                        <canvas class="zoom-canvas" id="zoomCanvas" width="180" height="180"></canvas>
+                        <div class="zoom-crosshair"></div>
+                    </div>
+                </div>
+
+                <div class="alignment-controls">
+                    <button class="control-btn start-btn" id="startAlignBtn" onclick="startPlacingMarkers()" disabled>
+                        🎯 Start Placement
+                    </button>
+                    <button class="control-btn undo-btn" id="undoBtn" onclick="undoLastMarker()" disabled>
+                        ↶ Undo Last
+                    </button>
+                    <button class="control-btn reset-btn" onclick="resetAlignment()">
+                        🔄 Reset
+                    </button>
+                    <button class="control-btn accept-btn" id="acceptAlignBtn" onclick="acceptAlignment()" disabled>
+                        ✅ Accept Alignment
+                    </button>
+                </div>
+
+                <div class="status" id="alignmentStatusMessage"></div>
+            </div>
+
+                <div class="marker-progress" id="markerProgress">
+                    <div class="marker-card current" id="marker-0">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Top-Left</div>
+                        <div class="marker-coords">Click to place</div>
+                    </div>
+                    <div class="marker-card" id="marker-1">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Top-Center</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-2">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Top-Right</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-3">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Mid-Left</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-4">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Mid-Center</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-5">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Mid-Right</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-6">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Bot-Left</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-7">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Bot-Center</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                    <div class="marker-card" id="marker-8">
+                        <span class="marker-shape">✚</span>
+                        <div class="marker-name">Bot-Right</div>
+                        <div class="marker-coords">Waiting...</div>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <div class="canvas-title" id="canvasTitle">Select an image to start alignment</div>
+                    <canvas id="alignmentCanvas" class="alignment-canvas" width="800" height="600"></canvas>
+                    <div class="canvas-instructions" id="canvasInstructions">
+                        Upload an image and click "Align Chart" to begin
+                    </div>
+                    <!-- Zoom Overlay -->
+                    <div class="zoom-overlay" id="zoomOverlay">
+                        <canvas class="zoom-canvas" id="zoomCanvas" width="180" height="180"></canvas>
+                        <div class="zoom-crosshair"></div>
+                    </div>
+                </div>
+
+                <div class="alignment-controls">
+                    <button class="control-btn start-btn" id="startAlignBtn" onclick="startPlacingMarkers()" disabled>
+                        🎯 Start Placement
+                    </button>
+                    <button class="control-btn undo-btn" id="undoBtn" onclick="undoLastMarker()" disabled>
+                        ↶ Undo Last
+                    </button>
+                    <button class="control-btn reset-btn" onclick="resetAlignment()">
+                        🔄 Reset
+                    </button>
+                    <button class="control-btn accept-btn" id="acceptAlignBtn" onclick="acceptAlignment()" disabled>
+                        ✅ Accept Alignment
+                    </button>
+                </div>
+
+                <div class="status" id="alignmentStatusMessage"></div>
+            </div>
+
+            <div class="controls">
+                <h3>⚙️ LUT Configuration</h3>
+                
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="standardMode" onclick="setLUTMode('standard')">
+                        Standard Color Matching
+                    </button>
+                    <button class="mode-btn" id="rangeAwareMode" onclick="setLUTMode('rangeAware')">
+                        Dynamic Range Optimization
+                    </button>
+                </div>
+
+                <div class="info-card" id="standardInfo">
+                    <h4>🎯 Standard Color Matching</h4>
+                    <p>Direct color-to-color mapping preserving original relationships. Best for matched lighting conditions and standard displays. Uses advanced 9-point sampling with outlier rejection for each of the 96 color patches (excluding 9 calibration markers).</p>
+                </div>
+
+                <div class="info-card highlight" id="rangeInfo" style="display: none;">
+                    <h4>🔬 Dynamic Range Optimization</h4>
+                    <p>Intelligent luminance range analysis and remapping. Analyzes the dynamic range of both images and applies compensation to maximize LED wall capabilities. Perfect when source and display have different brightness characteristics.</p>
+                </div>
+
+                <div class="control-grid">
+                    <div class="control-item">
+                        <label for="lutSize">LUT Resolution:</label>
+                        <select id="lutSize">
+                            <option value="17">17×17×17 (Fast Preview)</option>
+                            <option value="33" selected>33×33×33 (Production)</option>
+                            <option value="65">65×65×65 (High Precision)</option>
+                        </select>
+                    </div>
+                    <div class="control-item">
+                        <label for="fileName">Output Filename:</label>
+                        <input type="text" id="fileName" value="color_calibration" placeholder="Enter filename">
+                    </div>
+                </div>
+                
+                <button class="generate-btn" id="generateBtn" disabled onclick="generateLUT()">
+                    <span id="generateBtnText">Generate Color LUT</span>
+                    <span class="loading-spinner" style="display: none;"></span>
+                </button>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="status" id="statusMessage"></div>
+
+            <div class="analysis-section" id="analysisSection">
+                <div class="analysis-header">
+                    <h3 class="analysis-title">📊 Color Analysis Report</h3>
+                    <div class="quality-score" id="qualityScore">Calculating...</div>
+                </div>
+                
+                <div class="analysis-controls">
+                    <button class="toggle-btn active" id="heatmapToggle" onclick="toggleVisualization('heatmap')">
+                        Consistency Heatmap
+                    </button>
+                    <button class="toggle-btn active" id="valuesToggle" onclick="toggleVisualization('values')">
+                        Numeric Values
+                    </button>
+                    <button class="export-btn" onclick="exportAnalysis()">
+                        📊 Export Analysis
+                    </button>
+                </div>
+
+                <div class="stats-grid" id="rangeStats" style="display: none;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="refRangeStat">-</div>
+                        <div class="stat-label">Reference Range</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="camRangeStat">-</div>
+                        <div class="stat-label">Camera Range</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="rangeRatioStat">-</div>
+                        <div class="stat-label">Range Ratio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="offsetStat">-</div>
+                        <div class="stat-label">Offset</div>
+                    </div>
+                </div>
+
+                <div class="visualization-grid">
+                    <div class="visualization-card">
+                        <h4>Reference Chart Analysis</h4>
+                        <canvas class="visualization-canvas" id="refCanvas"></canvas>
+                    </div>
+                    <div class="visualization-card">
+                        <h4>Camera Capture Analysis</h4>
+                        <canvas class="visualization-canvas" id="camCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="legend-card">
+                    <h4>Quality Legend (Coefficient of Variation)</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #22c55e;"></div>
+                        <span><strong>Excellent (&lt;5%):</strong> Highly consistent sampling</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span><strong>Good (5-15%):</strong> Acceptable variation</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span><strong>Poor (&gt;15%):</strong> High inconsistency detected</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255,255,255,0.3); border: 2px solid #fbbf24;"></div>
+                        <span><strong>Marker (M):</strong> Calibration marker (not sampled)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="download-section" id="downloadSection">
+                <h3>✅ LUT Generated Successfully!</h3>
+                <p>Your professional .cube file is ready for use</p>
+                <a href="#" class="download-btn" id="downloadBtn">📥 Download LUT File</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/imageProcessor.js"></script>
+    <script src="js/alignment.js"></script>
+    <script src="js/lutGenerator.js"></script>
+    <script src="js/rangeAnalyzer.js"></script>
+    <script src="js/visualization.js"></script>
+    <script src="js/exporter.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
